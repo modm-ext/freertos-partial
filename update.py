@@ -37,3 +37,5 @@ for pattern in source_paths:
         else:
             shutil.copy2(path, dest)
 
+print("Normalizing FreeRTOS newlines and whitespace...")
+subprocess.run("sh ./post_script.sh > /dev/null 2>&1", shell=True)
