@@ -21,7 +21,8 @@ source_paths = [
 # clone the repository
 print("Cloning FreeRTOS repository...")
 if not Path("freertos_src").exists():
-    subprocess.run("git clone https://github.com/cjlano/freertos.git freertos_src", shell=True)
+    subprocess.run("git clone https://github.com/freertos/freertos.git freertos_src", shell=True)
+    subprocess.run("cd freertos_src && git submodule update --init", shell=True)
 
 # remove the sources in this repo
 if Path("FreeRTOS").exists():
