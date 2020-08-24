@@ -18,6 +18,15 @@ source_paths = [
     "FreeRTOS/License",
 ]
 
+source_paths_tcp = [
+	"FreeRTOS-Plus/Source/FreeRTOS-PLUS-TCP/portable/BufferManagement",
+	"FreeRTOS-Plus/Source/FreeRTOS-PLUS-TCP/portable/Compiler/GCC",
+	"FreeRTOS-Plus/Source/FreeRTOS-PLUS-TCP/include/*.h",
+	"FreeRTOS-Plus/Source/FreeRTOS-PLUS-TCP/tools",
+	"FreeRTOS-Plus/Source/FreeRTOS-PLUS-TCP/*.c",
+	"FreeRTOS-Plus/Source/FreeRTOS-PLUS-TCP/LICENSE_INFORMATION.txt",
+]
+
 # clone the repository
 print("Cloning FreeRTOS repository...")
 if not Path("freertos_src").exists():
@@ -27,11 +36,23 @@ if not Path("freertos_src").exists():
 # remove the sources in this repo
 if Path("FreeRTOS").exists():
     shutil.rmtree("FreeRTOS")
+if Path("FreeRTOS-Plus-TCP").exists():
+    shutil.rmtree("FreeRTOS-Plus-TCP")
 
 print("Copying FreeRTOS sources...")
 for pattern in source_paths:
     for path in Path("freertos_src").glob(pattern):
         dest = path.relative_to("freertos_src")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if path.is_dir():
+            shutil.copytree(path, dest)
+        else:
+            shutil.copy2(path, dest)
+
+print("Copying FreeRTOS-Plus-TCP sources...")
+for pattern in source_paths_tcp:
+    for path in Path("freertos_src").glob(pattern):
+        dest = path.relative_to("freertos_src/FreeRTOS-Plus/Source")
         dest.parent.mkdir(parents=True, exist_ok=True)
         if path.is_dir():
             shutil.copytree(path, dest)
