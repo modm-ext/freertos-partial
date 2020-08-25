@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.0.1
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.1
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -210,7 +210,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 										  uint8_t * const pucBuffer,
 										  size_t xBufferSizeBytes,
 										  size_t xTriggerLevelBytes,
-										  BaseType_t xIsMessageBuffer ) PRIVILEGED_FUNCTION;
+										  uint8_t ucFlags ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
@@ -219,12 +219,24 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 	StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes, size_t xTriggerLevelBytes, BaseType_t xIsMessageBuffer )
 	{
 	uint8_t *pucAllocatedMemory;
+	uint8_t ucFlags;
 
 		/* In case the stream buffer is going to be used as a message buffer
 		(that is, it will hold discrete messages with a little meta data that
 		says how big the next message is) check the buffer will be large enough
 		to hold at least one message. */
-		configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+		if( xIsMessageBuffer == pdTRUE )
+		{
+			/* Is a message buffer but not statically allocated. */
+			ucFlags = sbFLAGS_IS_MESSAGE_BUFFER;
+			configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+		}
+		else
+		{
+			/* Not a message buffer and not statically allocated. */
+			ucFlags = 0;
+			configASSERT( xBufferSizeBytes > 0 );
+		}
 		configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
 
 		/* A trigger level of 0 would cause a waiting task to unblock even when
@@ -251,7 +263,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 										   pucAllocatedMemory + sizeof( StreamBuffer_t ),  /* Storage area follows. */ /*lint !e9016 Indexing past structure valid for uint8_t pointer, also storage area has no alignment requirement. */
 										   xBufferSizeBytes,
 										   xTriggerLevelBytes,
-										   xIsMessageBuffer );
+										   ucFlags );
 
 			traceSTREAM_BUFFER_CREATE( ( ( StreamBuffer_t * ) pucAllocatedMemory ), xIsMessageBuffer );
 		}
@@ -276,6 +288,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 	{
 	StreamBuffer_t * const pxStreamBuffer = ( StreamBuffer_t * ) pxStaticStreamBuffer; /*lint !e740 !e9087 Safe cast as StaticStreamBuffer_t is opaque Streambuffer_t. */
 	StreamBufferHandle_t xReturn;
+	uint8_t ucFlags;
 
 		configASSERT( pucStreamBufferStorageArea );
 		configASSERT( pxStaticStreamBuffer );
@@ -286,6 +299,17 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 		if( xTriggerLevelBytes == ( size_t ) 0 )
 		{
 			xTriggerLevelBytes = ( size_t ) 1;
+		}
+
+		if( xIsMessageBuffer != pdFALSE )
+		{
+			/* Statically allocated message buffer. */
+			ucFlags = sbFLAGS_IS_MESSAGE_BUFFER | sbFLAGS_IS_STATICALLY_ALLOCATED;
+		}
+		else
+		{
+			/* Statically allocated stream buffer. */
+			ucFlags = sbFLAGS_IS_STATICALLY_ALLOCATED;
 		}
 
 		/* In case the stream buffer is going to be used as a message buffer
@@ -310,7 +334,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 										  pucStreamBufferStorageArea,
 										  xBufferSizeBytes,
 										  xTriggerLevelBytes,
-										  xIsMessageBuffer );
+										  ucFlags );
 
 			/* Remember this was statically allocated in case it is ever deleted
 			again. */
@@ -360,7 +384,7 @@ StreamBuffer_t * pxStreamBuffer = xStreamBuffer;
 	{
 		/* The structure and buffer were not allocated dynamically and cannot be
 		freed - just scrub the structure so future use will assert. */
-		memset( pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) );
+		( void ) memset( pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) );
 	}
 }
 /*-----------------------------------------------------------*/
@@ -368,7 +392,7 @@ StreamBuffer_t * pxStreamBuffer = xStreamBuffer;
 BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
 {
 StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
-BaseType_t xReturn = pdFAIL, xIsMessageBuffer;
+BaseType_t xReturn = pdFAIL;
 
 #if( configUSE_TRACE_FACILITY == 1 )
 	UBaseType_t uxStreamBufferNumber;
@@ -391,20 +415,11 @@ BaseType_t xReturn = pdFAIL, xIsMessageBuffer;
 		{
 			if( pxStreamBuffer->xTaskWaitingToSend == NULL )
 			{
-				if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
-				{
-					xIsMessageBuffer = pdTRUE;
-				}
-				else
-				{
-					xIsMessageBuffer = pdFALSE;
-				}
-
 				prvInitialiseNewStreamBuffer( pxStreamBuffer,
 											  pxStreamBuffer->pucBuffer,
 											  pxStreamBuffer->xLength,
 											  pxStreamBuffer->xTriggerLevelBytes,
-											  xIsMessageBuffer );
+											  pxStreamBuffer->ucFlags );
 				xReturn = pdPASS;
 
 				#if( configUSE_TRACE_FACILITY == 1 )
@@ -1085,7 +1100,7 @@ size_t xNextHead, xFirstLength;
 
 	/* Write as many bytes as can be written in the first write. */
 	configASSERT( ( xNextHead + xFirstLength ) <= pxStreamBuffer->xLength );
-	memcpy( ( void* ) ( &( pxStreamBuffer->pucBuffer[ xNextHead ] ) ), ( const void * ) pucData, xFirstLength ); /*lint !e9087 memcpy() requires void *. */
+	( void ) memcpy( ( void* ) ( &( pxStreamBuffer->pucBuffer[ xNextHead ] ) ), ( const void * ) pucData, xFirstLength ); /*lint !e9087 memcpy() requires void *. */
 
 	/* If the number of bytes written was less than the number that could be
 	written in the first write... */
@@ -1093,7 +1108,7 @@ size_t xNextHead, xFirstLength;
 	{
 		/* ...then write the remaining bytes to the start of the buffer. */
 		configASSERT( ( xCount - xFirstLength ) <= pxStreamBuffer->xLength );
-		memcpy( ( void * ) pxStreamBuffer->pucBuffer, ( const void * ) &( pucData[ xFirstLength ] ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
+		( void ) memcpy( ( void * ) pxStreamBuffer->pucBuffer, ( const void * ) &( pucData[ xFirstLength ] ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
 	}
 	else
 	{
@@ -1136,7 +1151,7 @@ size_t xCount, xFirstLength, xNextTail;
 		read.  Asserts check bounds of read and write. */
 		configASSERT( xFirstLength <= xMaxCount );
 		configASSERT( ( xNextTail + xFirstLength ) <= pxStreamBuffer->xLength );
-		memcpy( ( void * ) pucData, ( const void * ) &( pxStreamBuffer->pucBuffer[ xNextTail ] ), xFirstLength ); /*lint !e9087 memcpy() requires void *. */
+		( void ) memcpy( ( void * ) pucData, ( const void * ) &( pxStreamBuffer->pucBuffer[ xNextTail ] ), xFirstLength ); /*lint !e9087 memcpy() requires void *. */
 
 		/* If the total number of wanted bytes is greater than the number
 		that could be read in the first read... */
@@ -1144,7 +1159,7 @@ size_t xCount, xFirstLength, xNextTail;
 		{
 			/*...then read the remaining bytes from the start of the buffer. */
 			configASSERT( xCount <= xMaxCount );
-			memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
+			( void ) memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer ), xCount - xFirstLength ); /*lint !e9087 memcpy() requires void *. */
 		}
 		else
 		{
@@ -1195,7 +1210,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 										  uint8_t * const pucBuffer,
 										  size_t xBufferSizeBytes,
 										  size_t xTriggerLevelBytes,
-										  BaseType_t xIsMessageBuffer )
+										  uint8_t ucFlags )
 {
 	/* Assert here is deliberately writing to the entire buffer to ensure it can
 	be written to without generating exceptions, and is setting the buffer to a
@@ -1210,15 +1225,11 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 	} /*lint !e529 !e438 xWriteValue is only used if configASSERT() is defined. */
 	#endif
 
-	memset( ( void * ) pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) ); /*lint !e9087 memset() requires void *. */
+	( void ) memset( ( void * ) pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) ); /*lint !e9087 memset() requires void *. */
 	pxStreamBuffer->pucBuffer = pucBuffer;
 	pxStreamBuffer->xLength = xBufferSizeBytes;
 	pxStreamBuffer->xTriggerLevelBytes = xTriggerLevelBytes;
-
-	if( xIsMessageBuffer != pdFALSE )
-	{
-		pxStreamBuffer->ucFlags |= sbFLAGS_IS_MESSAGE_BUFFER;
-	}
+	pxStreamBuffer->ucFlags = ucFlags;
 }
 
 #if ( configUSE_TRACE_FACILITY == 1 )

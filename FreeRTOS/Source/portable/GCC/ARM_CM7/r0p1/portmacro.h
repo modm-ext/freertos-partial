@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.0.1
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.3.1
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -73,6 +73,7 @@ typedef unsigned long UBaseType_t;
 #define portSTACK_GROWTH			( -1 )
 #define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT			8
+#define portDONT_DISCARD			__attribute__(( used ))
 /*-----------------------------------------------------------*/
 
 /* Scheduler utilities. */
@@ -237,6 +238,7 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
 }
 /*-----------------------------------------------------------*/
 
+#define portMEMORY_BARRIER() __asm volatile( "" ::: "memory" )
 
 #ifdef __cplusplus
 }
