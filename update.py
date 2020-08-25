@@ -60,3 +60,6 @@ for pattern in source_paths_tcp:
 
 print("Normalizing FreeRTOS newlines and whitespace...")
 subprocess.run("sh ./post_script.sh > /dev/null 2>&1", shell=True)
+
+print("Apply FreeRTOS-Plus-TCP patch...")
+subprocess.run("git apply -v --ignore-whitespace FreeRTOS_IP.c.patch", shell=True)
