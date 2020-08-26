@@ -2818,7 +2818,7 @@ const char *pcName;
 		case pdFREERTOS_ERRNO_EISCONN:        pcName = "EISCONN"; break;
 		default:
 			/* Using function "snprintf". */
-			( void ) snprintf( pcBuffer, uxLength, "Errno %d", ( int32_t ) xErrnum );
+			( void ) snprintf( pcBuffer, uxLength, "Errno %ld", ( int32_t ) xErrnum );
 			pcName = NULL;
 			break;
 	}
