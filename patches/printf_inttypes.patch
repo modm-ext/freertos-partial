@@ -12,8 +12,8 @@ index bfd2a9c..112e879 100644
  #include "FreeRTOS.h"
 --- a/FreeRTOS-Plus-TCP/FreeRTOS_IP.c
 +++ b/FreeRTOS-Plus-TCP/FreeRTOS_IP.c
-@@ -2818,7 +2818,7 @@ const char *pcName;
- 		case pdFREERTOS_ERRNO_EISCONN:        pcName = "EISCONN"; break;
+@@ -3392,7 +3392,7 @@ const char *pcName;
+
  		default:
  			/* Using function "snprintf". */
 -			( void ) snprintf( pcBuffer, uxLength, "Errno %d", ( int32_t ) xErrnum );
