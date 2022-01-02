@@ -11,6 +11,7 @@ source_paths = [
     "FreeRTOS/Source/portable/GCC/ARM_CM3/**/*",
     "FreeRTOS/Source/portable/GCC/ARM_CM4F/**/*",
     "FreeRTOS/Source/portable/GCC/ARM_CM7/**/*",
+    "FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ/**/*",
     "FreeRTOS/Source/portable/MemMang/*.c",
     "FreeRTOS/Source/include/*.h",
     "FreeRTOS/Source/*.c",
