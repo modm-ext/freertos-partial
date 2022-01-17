@@ -28,8 +28,8 @@ index bbbab54..317696d 100644
  #ifndef ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND
      #define ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND    1
  #endif
-@@ -395,6 +391,10 @@
-     #define ipconfigNETWORK_MTU    1500
+@@ -433,6 +429,10 @@
+     #endif
  #endif
 
 +#if ( ipconfigNETWORK_MTU < 46 )
@@ -39,7 +39,7 @@ index bbbab54..317696d 100644
  #ifndef ipconfigTCP_MSS
      #define ipconfigTCP_MSS    ( ipconfigNETWORK_MTU - ( ipSIZE_OF_IPv4_HEADER + ipSIZE_OF_TCP_HEADER ) )
  #endif
-@@ -420,7 +420,7 @@
+@@ -467,7 +467,7 @@
      #endif /* _WINDOWS_ */
  #endif /* ipconfigMAXIMUM_DISCOVER_TX_PERIOD */
 
