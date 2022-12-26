@@ -19,12 +19,12 @@ source_paths = [
 ]
 
 source_paths_tcp = [
-	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/portable/BufferManagement/**/*",
-	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/portable/Compiler/GCC/**/*",
-	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/include/*.h",
+	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/source/portable/BufferManagement/**/*",
+	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/source/portable/Compiler/GCC/**/*",
+	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/source/include/*.h",
 	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/tools/**/*",
-	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/*.c",
-	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/LICENSE_INFORMATION.txt",
+	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/source/*.c",
+	"FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/LICENSE.md",
 ]
 
 with urllib.request.urlopen("https://api.github.com/repos/freertos/freertos/releases/latest") as response:
