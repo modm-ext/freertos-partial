@@ -66,12 +66,12 @@ for pattern in source_paths_tcp:
                            dest.open("w", encoding="utf-8") as wfile:
             wfile.writelines(l.rstrip()+"\n" for l in rfile.readlines())
 
-print("Apply patches...")
-for patch in Path("patches").glob("*.patch"):
-    result = subprocess.run("git apply -v --ignore-whitespace {}".format(patch), shell=True)
-    if result.returncode != 0:
-        print("Applying patch '{}' failed!".format(patch))
-        exit(1)
+# print("Apply patches...")
+# for patch in Path("patches").glob("*.patch"):
+#     result = subprocess.run("git apply -v --ignore-whitespace {}".format(patch), shell=True)
+#     if result.returncode != 0:
+#         print("Applying patch '{}' failed!".format(patch))
+#         exit(1)
 
 subprocess.run("git add FreeRTOS FreeRTOS-Plus-TCP", shell=True)
 if subprocess.call("git diff-index --quiet HEAD --", shell=True):
