@@ -9,6 +9,7 @@ The following paths are extracted:
 - `FreeRTOS/Source/portable/GCC/ARM_CM3`
 - `FreeRTOS/Source/portable/GCC/ARM_CM4F`
 - `FreeRTOS/Source/portable/GCC/ARM_CM7`
+- `FreeRTOS/Source/portable/GCC/ARM_CM33_NTZ`
 - `FreeRTOS/Source/portable/MemMang/*.c`
 - `FreeRTOS/Source/include/*.h`
 - `FreeRTOS/Source/*.c`
@@ -16,11 +17,14 @@ The following paths are extracted:
 
 ## FreeRTOS-Plus-TCP
 
-- `FreeRTOS-PLUS-TCP/portable/BufferManagement`
-- `FreeRTOS-PLUS-TCP/portable/Compiler/GCC`
-- `FreeRTOS-PLUS-TCP/include/*.h`
-- `FreeRTOS-PLUS-TCP/tools`
-- `FreeRTOS-PLUS-TCP/*.c`
-- `FreeRTOS-PLUS-TCP/LICENSE_INFORMATION.txt`
+- `FreeRTOS-Plus-TCP/source/portable/BufferManagement`
+- `FreeRTOS-Plus-TCP/source/portable/Compiler/GCC`
+- `FreeRTOS-Plus-TCP/source/include/*.h`
+- `FreeRTOS-Plus-TCP/source/*.c`
+- `FreeRTOS-Plus-TCP/tools/tcp_utilities/**/tcp_*`
+- `FreeRTOS-Plus-TCP/LICENSE.md`
+
+The kernel and Plus-TCP are git submodules of the FreeRTOS LTS repository and
+are checked out explicitly by `update.py`.
 
 This repository is updated periodically by GitHub Actions.

@@ -7,17 +7,20 @@ on:
 
 jobs:
   update:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Configure Git
         run: |
           git config --global user.email "bot@modm.io"
           git config --global user.name "modm update bot"
       - name: Run update.py script
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
+          wget -qL https://raw.githubusercontent.com/modm-ext/partial/main/partial.py
           python3 update.py
       - name: Git push
         run: |
-          git push origin master
+          git push origin main
